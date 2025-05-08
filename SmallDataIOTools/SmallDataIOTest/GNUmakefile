@@ -4,16 +4,19 @@
 ###  variable using the libraries named in the `LibNames' variable.
 
 # Included makefiles need an absolute path to the Chombo installation
-# CHOMBO_HOME := Please set the CHOMBO_HOME locally (e.g. export CHOMBO_HOME=... in bash)
 
-GRCHOMBO_SOURCE ?= ../../../GRChombo/Source
+# := means simply expanded, expanded once on the line and never again
+PROJ_DIR := $(realpath $(shell pwd)/..)
+BUILD_DIR := $(realpath $(shell pwd))
 
-ebase := SmallDataIOTest
 
-LibNames := BaseTools
 
-src_dirs := ../Source \
-            $(GRCHOMBO_SOURCE)/AMRInterpolator
+DIRS = Source SmallDataIOTest
+SRC_DIRS = $(foreach dir, $(DIRS), $(addprefix $(PROJ_DIR)/, $(dir)))
+
+#$(error   SRC_DIRS is $(SRC_DIRS))
+
+VPATH = $(SRC_DIRS)
 
 # Filesystem library is a C++17 feature
 XTRACXXFLAGS := $(XTRACXXFLAGS) -std=c++17
@@ -23,4 +26,50 @@ XTRACXXFLAGS := $(XTRACXXFLAGS) -std=c++17
 XTRALDFLAGS := $(XTRALDFLAGS) -lstdc++fs
 #export XTRALDFLAGS
 
-include $(CHOMBO_HOME)/mk/Make.test
+
+
+LD = $(CXX)
+LIB = 
+INCL = 
+
+BINROOT=./
+EX=test.out
+SHELL=/bin/bash
+
+SRC = $(foreach dir, $(SRC_DIRS), $(wildcard $(dir)/*.cpp))
+HEADERS = $(foreach dir, $(SRC_DIRS), $(wildcard $(dir)/*.hpp))
+INC = $(foreach dir, $(SRC_DIRS), $(addprefix -I, $(dir)))
+
+#SRC = $(wildcard *.cpp)
+#INC = $(wildcard *.hpp)
+OBJ = $(SRC:.cpp=.o)
+
+
+CXX = mpicxx
+CXXFLAGS = 
+CXXFLAGS += -std=c++17
+
+#
+# -- target : 	Dependencies
+# --		Rule to create target
+
+$(EX): 	$(OBJ) 
+	$(LD) -o $@ $(CXXFLAGS) $(OBJ) $(LIB)
+
+####################################################################
+
+$(OBJ): %.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c $(INC) $< -o $@
+#
+# -- Remove *.o and *~ from the directory
+clean:
+	rm -f *.o *~ 
+#
+# -- Remove *.o, *~, and executable from the directory
+realclean:
+	rm -f *.o *~ ./$(EX)
+
+#
+# -- Simple dependencies
+
+$(OBJ) : $(HEADERS)
