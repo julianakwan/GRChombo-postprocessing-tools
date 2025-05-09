@@ -63,11 +63,11 @@ $(OBJ): %.o: %.cpp
 #
 # -- Remove *.o and *~ from the directory
 clean:
-	rm -f *.o *~ 
+	rm -f *.o *~ $(OBJ)
 #
 # -- Remove *.o, *~, and executable from the directory
 realclean:
-	rm -f *.o *~ ./$(EX)
+	rm -f *.o *~ $(OBJ) ./$(EX)
 
 #
 # -- Simple dependencies

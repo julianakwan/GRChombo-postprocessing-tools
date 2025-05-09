@@ -77,7 +77,6 @@ void SmallDataIOReader::determine_file_structure()
 
     // go through each line and determine structure
     std::string line;
-    int consecutive_empty_line_count = 2;
     int block_counter = 0; // assume we always have one block
     int current_position = m_file.tellg();
     int block_start_position = current_position;
@@ -87,20 +86,19 @@ void SmallDataIOReader::determine_file_structure()
     {
         if (!line.empty())
         {
-            if (consecutive_empty_line_count == 2)
-            {
-                // start of new block
-                block_start_position = current_position;
-            }
-            consecutive_empty_line_count = 0;
-
             // header rows start with '#'
             if (line.find("#") != std::string::npos)
+	      {
+		if (header_row_counter==0)
+		  block_start_position = current_position;
+		
                 ++header_row_counter;
+	      }
             else
             {
                 if (data_row_counter++ == 0)
                 {
+	
                     // only count a new block if it contains a data row
                     m_file_structure.block_starts.push_back(
                         block_start_position);
@@ -157,8 +155,8 @@ void SmallDataIOReader::determine_file_structure()
         }
         else
         {
-            if (consecutive_empty_line_count++ == 0 &&
-                (header_row_counter > 0 || data_row_counter > 0))
+              if  (header_row_counter > 0 || data_row_counter > 0)
+	      
             {
                 // end of previous block
                 m_file_structure.num_header_rows.push_back(header_row_counter);
@@ -349,6 +347,8 @@ SmallDataIOReader::get_header_strings(int a_header_row_number, int a_block)
     std::string line;
     std::getline(m_file, line);
 
+    //    std::cout << line << std::endl;
+    
     std::vector<std::string> out(m_file_structure.num_data_columns[a_block]);
 
     for (int icol = 0; icol < out.size(); ++icol)
