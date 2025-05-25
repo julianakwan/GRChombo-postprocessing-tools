@@ -47,19 +47,19 @@ OBJ = $(SRC:.cpp=.o)
 
 CXX = mpicxx
 CXXFLAGS = 
-CXXFLAGS += -std=c++17
+CXXFLAGS += -std=c++17 -DTEST
 
 #
 # -- target : 	Dependencies
 # --		Rule to create target
 
 $(EX): 	$(OBJ) 
-	$(LD) -o $@ $(CXXFLAGS) $(OBJ) $(LIB)
+	$(LD) -o $@ $(CXXFLAGS) $(OBJ) $(LIB) 
 
 ####################################################################
 
 $(OBJ): %.o: %.cpp
-	$(CXX) $(CXXFLAGS) -c $(INC) $< -o $@
+	$(CXX) $(CXXFLAGS) -c $(INC) $< -o $@ 
 #
 # -- Remove *.o and *~ from the directory
 clean:

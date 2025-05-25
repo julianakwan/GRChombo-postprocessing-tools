@@ -7,6 +7,7 @@
 #include <chrono>
 #include <iomanip>
 #include <iostream>
+#include <map>
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -39,8 +40,12 @@ int main(int argc, char *argv[])
                   << file_structure.num_data_rows[i] << std::endl;
         std::cout << "Number of header rows in Block " << i << ": "
                   << file_structure.num_header_rows[i] << std::endl;
-	
     }
+
+    //    std::cout << "Coords width? " << file_structure.coords_width <<
+    //    std::endl; std::cout << "Data width? " << file_structure.data_width <<
+    //    std::endl;
+
     auto header = test_reader.get_header_strings(1, 0);
 
     for (auto it = header.begin(); it != header.end(); ++it)
@@ -55,9 +60,9 @@ int main(int argc, char *argv[])
         std::cout << *it << std::endl;
     }
 
-    auto data = test_reader.get_all_data_columns(0);
+    auto data = test_reader.get_columns("x_1 x_2", 0);
 
-    for (int ncols = 0; ncols < file_structure.num_data_columns[0]; ++ncols)
+    for (int ncols = 0; ncols < 2; ++ncols)
     {
         for (auto it = data[ncols].begin(); it != data[ncols].end(); ++it)
         {
@@ -65,6 +70,13 @@ int main(int argc, char *argv[])
         }
         std::cout << std::endl;
     }
+
+    SmallDataIOReader::file_structure_t known_file_structure;
+    known_file_structure.num_blocks = 2;
+    known_file_structure.block_starts = {0, 401};
+    known_file_structure.num_data_rows = {2, 2};
+    known_file_structure.num_data_columns = {7, 7};
+    known_file_structure.num_header_rows = {2, 2};
 
     test_reader.close();
 }

@@ -6,7 +6,11 @@
 #ifndef SMALLDATAIOREADER_HPP
 #define SMALLDATAIOREADER_HPP
 
+
+#define MAX_FILE_SIZE 1024*1024*1024
+
 #include <fstream>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -22,26 +26,20 @@ class SmallDataIOReader
         int num_blocks; // a block is separated by 2 blank lines
         std::vector<unsigned long long int>
             block_starts; // position offsets from the beginning of the file
-        std::vector<int> num_data_rows;      // the number of data rows in each
-                                             // block
-        std::vector<int> num_header_rows;    // the number of header rows in
-                                             // each block
-        std::vector<int> num_coords_columns; // number of coord columns in
-                                             // each block - assume constant
-                                             // in each block
-        int coords_width;                    // assume the same throughout file
-        std::vector<int> num_data_columns;   // number of data columns in each
-                                             // block
 
-        int data_width;               // assume the same throughout file
-        std::vector<int> num_columns; // sum of coord and data columns in each
-                                      // block
+        std::vector<int> num_header_rows;  // the number of header rows in
+                                           // each block
+        std::vector<int> num_data_rows;    // the number of data rows in each
+                                           // block
+        std::vector<int> num_data_columns; // number of data columns in each
+                                           // block
         void clear();
     };
 
   protected:
     std::string m_filename;
     std::ifstream m_file;
+    std::string m_file_contents;
     file_structure_t m_file_structure;
     bool m_structure_defined;
 
@@ -59,6 +57,9 @@ class SmallDataIOReader
     // Closes the file
     void close();
 
+    // Reads the entire file
+    std::string read_entire_file(const std::string a_filename) const;
+
     // Parses the file and determines its structure
     void determine_file_structure();
 
@@ -72,6 +73,9 @@ class SmallDataIOReader
     // Get an interval of columns (inclusive) from a block
     std::vector<column_t> get_columns(int a_min_column, int a_max_column,
                                       int a_block = 0);
+
+    std::vector<column_t> get_columns(const std::string column_names,
+                                      const int a_block = 0);
 
     // Get all data columns from a block
     std::vector<column_t> get_all_data_columns(int a_block = 0);
